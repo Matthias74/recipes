@@ -1,0 +1,32 @@
+.recipes {
+  text-align: center;
+}
+
+.remove {
+  cursor: pointer;
+}
+
+.remove:hover {
+  color: red;
+}
+
+.recipes-list {
+  height: 300px;
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.matching-ingredient-list {
+  height: 125px;
+  max-height: 125px;
+  overflow-y: scroll;
+}
+
+.ingredient {
+  cursor: pointer;
+}
+
+.ingredient:hover {
+  background: #80808012;
+  border-radius: 5px;
+}
