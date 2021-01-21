@@ -12,11 +12,12 @@ class RecipesController < ApplicationController
 
     @recipes = if params[:strict].present?
       @recipes.filter do |recipe|
-        recipe.cleaned_ingredient_ids.all? { |id| params[:ingredient_ids].map(&:to_i).include?(id) }
+        params[:ingredient_ids].all? { |id| recipe.cleaned_ingredient_ids.include?(id.to_i) } &&
+        params[:ingredients_id].length == recipe.cleaned_ingredient_ids.length
       end
     else
       @recipes.filter do |recipe|
-        recipe.cleaned_ingredient_ids.any? { |id| params[:ingredient_ids].map(&:to_i).include?(id) }
+        params[:ingredient_ids].all? { |id| recipe.cleaned_ingredient_ids.include?(id.to_i) }
       end
     end
 
@@ -24,19 +25,15 @@ class RecipesController < ApplicationController
   end
 
   def ensure_params_present
-    unless params[:people_quantity].present?
-      raise StandardError.new "people_quantity param missing"
-    end
-
-    unless params[:ingredient_ids].present?
-      raise StandardError.new "ingredient_ids param missing"
+    if params[:people_quantity].blank? || params[:ingredient_ids].blank?
+      redirect_to root_path
     end
   end
 end
 
 # RECIPES
 # I chose this data model but there is an ther way to do:
-# We can do an has_many_and_belongs to table called recipes_ingredients
+# We can do an has_many_and_belongs_to table called recipes_ingredients
 # In this this table column would be:
 # - recipe_id
 # - ingredient_id
@@ -49,19 +46,19 @@ end
 # WHERE(
 #   recipes.peope_quantity = "#{params[:people_quantity]}"
 #   AND recipes_ingredients.ingredient_id IN ('params[:ingredient_ids]'))
-#) GROUP By recipes.id
+# ) GROUP BY recipes.id
 #
-#- for strict mode:
+# - for strict mode:
 #
-#SELECT * FROM recipes
-#INNER JOIN recipes_ingredients ON recipes_ingredients.recipe_id = recipes.id
-#WHERE(
-# NOT EXIST(
-#  SELECT 1 FROM recipes_ingredients
-#  WHERE
-#   recipes_ingredients.recipes_id = recipes.id AND
-#   recipes_ingredients.ingredient_id NOT IN (params[:ingredients_id])
-# ) AND ( recipes.people_quantity: params[:people_quantity])
-#)
+# SELECT * FROM recipes
+# INNER JOIN recipes_ingredients ON recipes_ingredients.recipe_id = recipes.id
+# WHERE(
+#  NOT EXISTS(
+#   SELECT 1 FROM recipes_ingredients
+#   WHERE
+#    recipes_ingredients.recipes_id = recipes.id AND
+#    recipes_ingredients.ingredient_id NOT IN (params[:ingredients_id])
+#  ) AND ( recipes.people_quantity: params[:people_quantity])
+# )
 #
 #

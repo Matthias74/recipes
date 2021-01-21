@@ -13,8 +13,8 @@ class IngredientsController < ApplicationController
   end
 
   def ensure_params_present
-    unless params[:query].present?
-      raise StandardError.new "query param missing"
+    if params[:query].blank?
+      redirect_to root_path
     end
   end
 end

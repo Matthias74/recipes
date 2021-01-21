@@ -31,15 +31,13 @@
     methods: {
       selectIngredient(ingredient) {
         this.selectedIngredients.push(ingredient)
+        this.resetRecipes()
       },
 
       removeIngredient(ingredient) {
         const ingredients = this.selectedIngredients.filter((selectedIngr) => selectedIngr.id !== ingredient.id)
         this.selectedIngredients = ingredients
-        this.displayRecipes = false
-        this.recipes = []
-        this.pagination.recipes.currentPage = 1
-        this.pagination.recipes.totalPages = null
+        this.resetRecipes()
       },
 
       fetchMatchingIngredients() {
@@ -104,8 +102,27 @@
         }
       },
 
-      selectedIngredientsHas(string) {
-        return !!this.selectedIngredients.find((selectedIngredient) => selectedIngredient.name === string)
+      selectedIngredientsHas(ingredient) {
+        return !!this.selectedIngredients.find((selectedIngr) => {
+          return selectedIngr.name.split(" ").every((word) => {
+            return ingredient.includes(word)
+          })
+        })
+      },
+
+      canSeachRecipes() {
+        if(this.strictSelection) {
+          return this.selectedIngredients.length < 2 || this.isFetchingRecipes
+        } else {
+          return this.selectedIngredients.length === 0 || this.isFetchingRecipes
+        }
+      },
+
+      resetRecipes() {
+        this.displayRecipes = false
+        this.recipes = []
+        this.pagination.recipes.currentPage = 1
+        this.pagination.recipes.totalPages = null
       }
     },
 
@@ -119,17 +136,11 @@
         }
       },
       strictSelection: function() {
-        this.displayRecipes = false
-        this.recipes = []
-        this.pagination.recipes.currentPage = 1
-        this.pagination.recipes.totalPages = null
+        this.resetRecipes()
       },
 
       peopleQuantity: function() {
-        this.displayRecipes = false
-        this.recipes = []
-        this.pagination.recipes.currentPage = 1
-        this.pagination.recipes.totalPages = null
+        this.resetRecipes()
       }
     }
   }
@@ -232,10 +243,15 @@
           </li>
         </ul>
       </template>
-
+      <p
+        v-if="strictSelection && selectedIngredients.length < 2"
+        class="text-danger"
+      >
+        You must select at least 2 ingredients
+      </p>
       <button
         @click="fetchMatchingRecipes"
-        :disabled="selectedIngredients.length === 0 || isFetchingRecipes"
+        :disabled="canSeachRecipes()"
         class="btn btn-success"
       >
         Search recipes
@@ -252,7 +268,9 @@
         </div>
         <template v-else>
           <span v-if="recipes.length === 0">
-            No Matching recipes
+            No Matching recipes for
+            {{ peopleQuantity }} gest(s)
+            containing your selected ingredients
           </span>
           <template v-else>
             <ul
@@ -280,11 +298,11 @@
                   <h5 class="card-title">Ingredients</h5>
                   <ul>
                     <li v-for="ingredient in recipe.ingredients">
-                      <template v-for="subString in ingredient.split(' ')">
-                        <span :class="{'font-weight-bold': selectedIngredientsHas(subString) }">
-                          {{ subString }}
+
+                        <span :class="{'font-weight-bold': selectedIngredientsHas(ingredient) }">
+                          {{ ingredient }}
                         </span>
-                      </template>
+
                     </li>
                   </ul>
                 </div>

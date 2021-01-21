@@ -1,9 +1,11 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue.esm.js'
 import Recipes from '../recipes/recipes.vue'
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = new Vue({
-    render: h => h(Recipes)
-  }).$mount()
-  document.body.appendChild(app.$el)
-})
+  new Vue({
+    el: '#app',
+    components: {
+      recipes: Recipes
+    }
+  });
+});
