@@ -17,8 +17,10 @@ ActiveRecord::Schema.define(version: 2021_01_17_162204) do
 
   create_table "ingredients", force: :cascade do |t|
     t.string "name"
+    t.integer "recipe_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["name"], name: "index_ingredients_on_name"
   end
 
   create_table "recipes", force: :cascade do |t|
@@ -26,7 +28,6 @@ ActiveRecord::Schema.define(version: 2021_01_17_162204) do
     t.text "author_tip"
     t.string "budget"
     t.string "prep_time"
-    t.text "ingredients"
     t.string "name"
     t.string "author"
     t.string "difficulty"
@@ -35,8 +36,6 @@ ActiveRecord::Schema.define(version: 2021_01_17_162204) do
     t.text "tags"
     t.string "total_time"
     t.text "nb_comments"
-    t.text "cleaned_ingredients"
-    t.text "cleaned_ingredient_ids"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["name"], name: "index_recipes_on_name"
